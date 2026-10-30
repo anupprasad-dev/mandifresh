@@ -16,7 +16,7 @@ export function CartProvider({ children }) {
     try { localStorage.setItem(KEY, JSON.stringify(lines)); } catch { /* storage unavailable */ }
   }, [lines]);
 
-  // lines: [{ id, slug, name, price, unit, image_url, emoji, stock, qty }]
+  // lines: [{ id, slug, name, price, unit, image, category_name, stock, qty }]
   const add = useCallback((p, qty = 1) => {
     setLines((cur) => {
       const found = cur.find((l) => l.id === p.id);
@@ -24,7 +24,7 @@ export function CartProvider({ children }) {
       if (found) return cur.map((l) => (l.id === p.id ? { ...l, stock: max, price: p.price, qty: Math.min(l.qty + qty, max, 50) } : l));
       return [...cur, {
         id: p.id, slug: p.slug, name: p.name, price: Number(p.price), unit: p.unit,
-        image_url: p.image_url, emoji: p.category?.emoji, stock: max, qty: Math.min(qty, max, 50),
+        image: p.image, category_name: p.category?.name, stock: max, qty: Math.min(qty, max, 50),
       }];
     });
   }, []);

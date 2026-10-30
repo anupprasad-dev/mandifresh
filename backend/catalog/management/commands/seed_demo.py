@@ -81,7 +81,11 @@ class Command(BaseCommand):
         if created:
             seller.set_password("Seller@12345")
             seller.save()
-            SellerProfile.objects.create(user=seller, store_name="Odisha Farm Fresh", city="Bhubaneswar")
+        SellerProfile.objects.update_or_create(
+            user=seller, defaults={"store_name": "Odisha Farm Fresh", "city": "Bhubaneswar", "is_approved": True}
+        )
+        if not User.objects.filter(email="admin@mandifresh.test").exists():
+            User.objects.create_superuser(email="admin@mandifresh.test", password="Admin@12345", name="Demo Admin")
         for name, cat, price, mrp, unit, stock, featured in PRODUCTS:
             Product.objects.update_or_create(
                 seller=seller, name=name,
@@ -92,4 +96,6 @@ class Command(BaseCommand):
                 },
             )
         self.stdout.write(self.style.SUCCESS(f"{len(PRODUCTS)} demo products ready."))
-        self.stdout.write("Demo seller login (DEV ONLY): seller@mandifresh.test / Seller@12345  ->  /seller/login")
+        self.stdout.write("DEV ONLY demo logins:")
+        self.stdout.write("  seller: seller@mandifresh.test / Seller@12345  ->  /seller/login")
+        self.stdout.write("  admin : admin@mandifresh.test  / Admin@12345   ->  /admin/login")

@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { errorMessage, fieldErrors } from "../api";
+import AuthLayout from "../components/AuthLayout";
 import { Field, PasswordInput, StrengthBar } from "../components/Field";
-import { Logo } from "../components/Header";
 import { useAuth } from "../context/AuthContext";
 
 export default function Register() {
@@ -34,11 +34,9 @@ export default function Register() {
   };
 
   return (
-    <div className="auth-wrap">
-      <form className="card auth-card" onSubmit={submit} noValidate>
-        <Logo />
-        <h1>Create your account</h1>
-        <p className="muted">It takes less than a minute.</p>
+    <AuthLayout title="Create your account" subtitle="It takes less than a minute."
+      footer={<p className="muted">Already have an account? <Link to="/login" state={state} className="link">Sign in</Link></p>}>
+      <form onSubmit={submit} noValidate>
         {error && <div className="alert" role="alert">{error}</div>}
         <Field id="name" label="Full name" error={errs.name}><input id="name" value={f.name} onChange={set("name")} autoComplete="name" required autoFocus /></Field>
         <Field id="email" label="Email" error={errs.email}><input id="email" type="email" value={f.email} onChange={set("email")} autoComplete="email" required /></Field>
@@ -49,8 +47,7 @@ export default function Register() {
         <StrengthBar value={f.password} />
         <Field id="confirm" label="Confirm password" error={errs.confirm}><PasswordInput id="confirm" value={f.confirm} onChange={set("confirm")} autoComplete="new-password" /></Field>
         <button className="btn btn-primary btn-lg block" disabled={busy}>{busy ? "Creating account…" : "Create account"}</button>
-        <p className="center muted">Already have an account? <Link to="/login" state={state} className="link">Sign in</Link></p>
       </form>
-    </div>
+    </AuthLayout>
   );
 }

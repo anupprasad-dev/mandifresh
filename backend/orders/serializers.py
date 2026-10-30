@@ -59,7 +59,7 @@ class OrderCreateSerializer(serializers.Serializer):
         # Lock rows in a stable order so concurrent checkouts can't oversell stock.
         products = {
             p.id: p
-            for p in Product.objects.select_for_update().filter(id__in=sorted(wanted), is_active=True)
+            for p in Product.objects.select_for_update(of=("self",)).filter(id__in=sorted(wanted), is_active=True, seller__seller_profile__is_approved=True).defer("image_data")
         }
         errors = []
         for pid, qty in wanted.items():
@@ -78,7 +78,7 @@ class OrderCreateSerializer(serializers.Serializer):
             p = products[pid]
             OrderItem.objects.create(
                 order=order, product=p, seller=p.seller, product_name=p.name, unit=p.unit,
-                image_url=p.image_url, price=p.price, quantity=qty,
+                image_url=p.image_src, price=p.price, quantity=qty,
             )
             p.stock -= qty
             p.save(update_fields=["stock", "updated_at"])

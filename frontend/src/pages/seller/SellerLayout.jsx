@@ -5,8 +5,8 @@ export default function SellerLayout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   return (
-    <div className="seller-shell">
-      <aside className="seller-side">
+    <div className="dash-shell seller">
+      <aside className="dash-side">
         <div className="logo"><span className="logo-mark">🏪</span><span className="logo-text">Mandi<b>Fresh</b></span></div>
         <p className="store-name">{user.store_name}</p>
         <nav>
@@ -14,9 +14,16 @@ export default function SellerLayout() {
           <NavLink to="/seller/products">📦 Products</NavLink>
           <NavLink to="/seller/orders">🧾 Orders</NavLink>
         </nav>
-        <button className="btn btn-ghost" onClick={async () => { await logout(); navigate("/seller/login"); }}>Sign out</button>
+        <button className="btn btn-ghost" onClick={async () => { await logout(); navigate("/seller/login"); }}>↩ Sign out</button>
       </aside>
-      <main className="seller-main"><Outlet /></main>
+      <main className="dash-main">
+        {user.seller_approved === false && (
+          <div className="notice warn" role="status">
+            <b>Your store is awaiting approval.</b> You can add products now. They become visible to shoppers once an administrator approves your store.
+          </div>
+        )}
+        <Outlet />
+      </main>
     </div>
   );
 }

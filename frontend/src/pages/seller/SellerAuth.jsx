@@ -1,21 +1,9 @@
 import { useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { errorMessage, fieldErrors } from "../../api";
+import AuthLayout from "../../components/AuthLayout";
 import { Field, PasswordInput, StrengthBar } from "../../components/Field";
 import { useAuth } from "../../context/AuthContext";
-
-function Shell({ title, subtitle, children, onSubmit }) {
-  return (
-    <div className="auth-wrap seller-auth">
-      <form className="card auth-card" onSubmit={onSubmit} noValidate>
-        <div className="logo"><span className="logo-mark">🏪</span><span className="logo-text">Mandi<b>Fresh</b> Seller</span></div>
-        <h1>{title}</h1>
-        <p className="muted">{subtitle}</p>
-        {children}
-      </form>
-    </div>
-  );
-}
 
 export function SellerLogin() {
   const { user, sellerLogin } = useAuth();
@@ -35,14 +23,16 @@ export function SellerLogin() {
   };
 
   return (
-    <Shell title="Seller sign in" subtitle="Manage your products and orders." onSubmit={submit}>
-      {error && <div className="alert" role="alert">{error}</div>}
-      <Field id="email" label="Email"><input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" required autoFocus /></Field>
-      <Field id="password" label="Password"><PasswordInput id="password" value={password} onChange={(e) => setPassword(e.target.value)} /></Field>
-      <div className="right"><Link to="/seller/forgot-password" className="link small">Forgot password?</Link></div>
-      <button className="btn btn-primary btn-lg block" disabled={busy}>{busy ? "Signing in…" : "Sign in"}</button>
-      <p className="center muted">Want to sell on MandiFresh? <Link to="/seller/register" className="link">Create a seller account</Link></p>
-    </Shell>
+    <AuthLayout variant="seller" title="Seller sign in" subtitle="Manage your products and orders."
+      footer={<p className="muted">Want to sell on MandiFresh? <Link to="/seller/register" className="link">Create a seller account</Link></p>}>
+      <form onSubmit={submit}>
+        {error && <div className="alert" role="alert">{error}</div>}
+        <Field id="email" label="Email"><input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" required autoFocus /></Field>
+        <Field id="password" label="Password"><PasswordInput id="password" value={password} onChange={(e) => setPassword(e.target.value)} /></Field>
+        <div className="right"><Link to="/seller/forgot-password" className="link small">Forgot password?</Link></div>
+        <button className="btn btn-primary btn-lg block" disabled={busy}>{busy ? "Signing in…" : "Sign in"}</button>
+      </form>
+    </AuthLayout>
   );
 }
 
@@ -73,22 +63,24 @@ export function SellerRegister() {
   };
 
   return (
-    <Shell title="Become a seller" subtitle="Create your store and start selling in minutes." onSubmit={submit}>
-      {error && <div className="alert" role="alert">{error}</div>}
-      <Field id="store_name" label="Store name" error={errs.store_name}><input id="store_name" value={f.store_name} onChange={set("store_name")} required autoFocus /></Field>
-      <div className="form-grid">
-        <Field id="name" label="Your name" error={errs.name}><input id="name" value={f.name} onChange={set("name")} required autoComplete="name" /></Field>
-        <Field id="city" label="City" error={errs.city}><input id="city" value={f.city} onChange={set("city")} /></Field>
-      </div>
-      <div className="form-grid">
-        <Field id="email" label="Email" error={errs.email}><input id="email" type="email" value={f.email} onChange={set("email")} required autoComplete="email" /></Field>
-        <Field id="phone" label="Phone" error={errs.phone && "Enter a valid phone number"}><input id="phone" value={f.phone} onChange={set("phone")} inputMode="tel" autoComplete="tel" /></Field>
-      </div>
-      <Field id="password" label="Password" error={errs.password} hint="At least 8 characters. Avoid common passwords."><PasswordInput id="password" value={f.password} onChange={set("password")} autoComplete="new-password" /></Field>
-      <StrengthBar value={f.password} />
-      <Field id="confirm" label="Confirm password" error={errs.confirm}><PasswordInput id="confirm" value={f.confirm} onChange={set("confirm")} autoComplete="new-password" /></Field>
-      <button className="btn btn-primary btn-lg block" disabled={busy}>{busy ? "Creating store…" : "Create seller account"}</button>
-      <p className="center muted">Already a seller? <Link to="/seller/login" className="link">Sign in</Link></p>
-    </Shell>
+    <AuthLayout variant="seller" title="Become a seller" subtitle="Create your store. Our team approves new sellers before products go live."
+      footer={<p className="muted">Already a seller? <Link to="/seller/login" className="link">Sign in</Link></p>}>
+      <form onSubmit={submit} noValidate>
+        {error && <div className="alert" role="alert">{error}</div>}
+        <Field id="store_name" label="Store name" error={errs.store_name}><input id="store_name" value={f.store_name} onChange={set("store_name")} required autoFocus /></Field>
+        <div className="form-grid">
+          <Field id="name" label="Your name" error={errs.name}><input id="name" value={f.name} onChange={set("name")} required autoComplete="name" /></Field>
+          <Field id="city" label="City" error={errs.city}><input id="city" value={f.city} onChange={set("city")} /></Field>
+        </div>
+        <div className="form-grid">
+          <Field id="email" label="Email" error={errs.email}><input id="email" type="email" value={f.email} onChange={set("email")} required autoComplete="email" /></Field>
+          <Field id="phone" label="Phone" error={errs.phone && "Enter a valid phone number"}><input id="phone" value={f.phone} onChange={set("phone")} inputMode="tel" autoComplete="tel" /></Field>
+        </div>
+        <Field id="password" label="Password" error={errs.password} hint="At least 8 characters. Avoid common passwords."><PasswordInput id="password" value={f.password} onChange={set("password")} autoComplete="new-password" /></Field>
+        <StrengthBar value={f.password} />
+        <Field id="confirm" label="Confirm password" error={errs.confirm}><PasswordInput id="confirm" value={f.confirm} onChange={set("confirm")} autoComplete="new-password" /></Field>
+        <button className="btn btn-primary btn-lg block" disabled={busy}>{busy ? "Creating store…" : "Create seller account"}</button>
+      </form>
+    </AuthLayout>
   );
 }

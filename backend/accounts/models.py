@@ -57,7 +57,29 @@ class SellerProfile(models.Model):
     store_name = models.CharField(max_length=120)
     description = models.TextField(blank=True)
     city = models.CharField(max_length=80, blank=True)
+    # New sellers must be approved by an admin before their products appear in the public store.
+    is_approved = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.store_name
+
+
+class RefreshSession(models.Model):
+    """Server-side record of every refresh token we issue (one row per token).
+
+    Lets us rotate tokens on every use, revoke on logout / password change / account
+    disable, and detect stolen-token reuse. `family` groups all tokens of one login.
+    """
+    jti = models.CharField(max_length=32, unique=True)
+    family = models.CharField(max_length=32, db_index=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="refresh_sessions")
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField(db_index=True)
+    revoked_at = models.DateTimeField(null=True, blank=True)
+    replaced_by = models.CharField(max_length=32, blank=True)
+    user_agent = models.CharField(max_length=200, blank=True)
+    ip = models.GenericIPAddressField(null=True, blank=True)
+
+    def __str__(self):
+        return f"session {self.jti[:8]} for {self.user_id}"

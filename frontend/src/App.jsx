@@ -1,7 +1,7 @@
 import { Route, Routes, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import Footer from "./components/Footer";
-import { RequireCustomer, RequireSeller } from "./components/Guards";
+import { RequireAdmin, RequireCustomer, RequireSeller } from "./components/Guards";
 import Header from "./components/Header";
 import Account from "./pages/Account";
 import Cart from "./pages/Cart";
@@ -21,6 +21,13 @@ import SellerLayout from "./pages/seller/SellerLayout";
 import SellerOrders from "./pages/seller/SellerOrders";
 import SellerProductForm from "./pages/seller/SellerProductForm";
 import SellerProducts from "./pages/seller/SellerProducts";
+import AdminCategories from "./pages/admin/AdminCategories";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminLayout from "./pages/admin/AdminLayout";
+import AdminLogin from "./pages/admin/AdminLogin";
+import AdminOrders from "./pages/admin/AdminOrders";
+import AdminProducts from "./pages/admin/AdminProducts";
+import AdminUsers from "./pages/admin/AdminUsers";
 
 function ScrollTop() {
   const { pathname } = useLocation();
@@ -54,6 +61,17 @@ export default function App() {
           <Route path="products/new" element={<SellerProductForm />} />
           <Route path="products/:id" element={<SellerProductForm />} />
           <Route path="orders" element={<SellerOrders />} />
+        </Route>
+
+        {/* Admin portal: URL-only access, never linked from the storefront. Accounts are created with `manage.py create_admin`. */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin" element={<RequireAdmin><AdminLayout /></RequireAdmin>}>
+          <Route index element={<AdminDashboard />} />
+          <Route path="orders" element={<AdminOrders />} />
+          <Route path="products" element={<AdminProducts />} />
+          <Route path="categories" element={<AdminCategories />} />
+          <Route path="sellers" element={<AdminUsers role="seller" />} />
+          <Route path="customers" element={<AdminUsers role="customer" />} />
         </Route>
 
         {/* Customer storefront */}

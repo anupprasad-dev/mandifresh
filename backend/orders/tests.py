@@ -25,9 +25,9 @@ class ShopFlowTests(APITestCase):
         cache.clear()
         self.cat = Category.objects.create(name="Fruits")
         self.seller = User.objects.create_user("s@example.com", STRONG, name="S", role="seller")
-        SellerProfile.objects.create(user=self.seller, store_name="S Store")
+        SellerProfile.objects.create(user=self.seller, store_name="S Store", is_approved=True)
         self.other = User.objects.create_user("o@example.com", STRONG, name="O", role="seller")
-        SellerProfile.objects.create(user=self.other, store_name="O Store")
+        SellerProfile.objects.create(user=self.other, store_name="O Store", is_approved=True)
         self.customer = User.objects.create_user("c@example.com", STRONG, name="C")
         self.apple = Product.objects.create(seller=self.seller, category=self.cat, name="Apple", price=100, stock=5)
 
@@ -77,3 +77,29 @@ class ShopFlowTests(APITestCase):
         s = login("s@example.com", "/api/seller/auth/login/")
         self.assertEqual(s.patch(f"/api/seller/orders/{item.id}/status/", {"status": "delivered"}, format="json").status_code, 400)
         self.assertEqual(s.patch(f"/api/seller/orders/{item.id}/status/", {"status": "confirmed"}, format="json").status_code, 200)
+
+
+class ImageUploadTests(APITestCase):
+    def setUp(self):
+        cache.clear()
+        self.cat = Category.objects.create(name="Fruits")
+        self.seller = User.objects.create_user("s@example.com", STRONG, name="S", role="seller")
+        SellerProfile.objects.create(user=self.seller, store_name="S Store", is_approved=True)
+        self.apple = Product.objects.create(seller=self.seller, category=self.cat, name="Apple", price=100, stock=5)
+        self.api = login("s@example.com", "/api/seller/auth/login/")
+
+    def upload(self, data, name="a.png"):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        return self.api.post(f"/api/seller/products/{self.apple.id}/image/", {"image": SimpleUploadedFile(name, data)}, format="multipart")
+
+    def test_valid_png_is_stored_and_served(self):
+        png = b"\x89PNG\r\n\x1a\n" + b"0" * 64
+        r = self.upload(png)
+        self.assertEqual(r.status_code, 200, r.data)
+        self.assertTrue(r.data["has_upload"])
+        served = self.client.get(f"/api/products/{self.apple.id}/image/")
+        self.assertEqual(served["Content-Type"], "image/png")
+        self.assertEqual(served.content, png)
+
+    def test_non_image_is_rejected_even_with_image_extension(self):
+        self.assertEqual(self.upload(b"<script>alert(1)</script>", "evil.png").status_code, 400)

@@ -63,7 +63,7 @@ class OrderItem(models.Model):
     # snapshots so history stays correct even if the product changes or is deleted
     product_name = models.CharField(max_length=160)
     unit = models.CharField(max_length=40, blank=True)
-    image_url = models.URLField(max_length=500, blank=True)
+    image_url = models.CharField(max_length=600, blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     quantity = models.PositiveIntegerField()
     status = models.CharField(max_length=12, choices=Status.choices, default=Status.PENDING)

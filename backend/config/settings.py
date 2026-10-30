@@ -24,25 +24,25 @@ DEBUG = env_bool("DJANGO_DEBUG", False)
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "")
 if not SECRET_KEY:
     if DEBUG:
-        SECRET_KEY = "dev-only-insecure-key"
+        SECRET_KEY = "dev-only-insecure-key-" + "x" * 40
     else:
         raise ImproperlyConfigured("DJANGO_SECRET_KEY must be set when DEBUG is off.")
+if not DEBUG and len(SECRET_KEY) < 32:
+    raise ImproperlyConfigured("DJANGO_SECRET_KEY must be at least 32 characters.")
 
 ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1")
 
 INSTALLED_APPS = [
-    "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
-    "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
-    "rest_framework_simplejwt.token_blacklist",
     "corsheaders",
     "accounts",
     "catalog",
     "orders",
+    "adminpanel",
 ]
 
 MIDDLEWARE = [
@@ -53,7 +53,6 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
@@ -69,7 +68,6 @@ TEMPLATES = [
             "context_processors": [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
-                "django.contrib.messages.context_processors.messages",
             ]
         },
     }
@@ -111,7 +109,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # --- DRF / JWT ---
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": ("rest_framework_simplejwt.authentication.JWTAuthentication",),
+    "DEFAULT_AUTHENTICATION_CLASSES": ("accounts.authentication.JWTAuthentication",),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticatedOrReadOnly",),
     "DEFAULT_RENDERER_CLASSES": ("rest_framework.renderers.JSONRenderer",),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
@@ -120,13 +118,17 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_RATES": {"anon": "300/min", "user": "600/min", "auth": "30/min"},
 }
 
-SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
-    "ROTATE_REFRESH_TOKENS": True,
-    "BLACKLIST_AFTER_ROTATION": True,
-    "UPDATE_LAST_LOGIN": True,
+# --- JWT (own implementation on top of PyJWT, see accounts/jwt_core.py and accounts/tokens.py) ---
+JWT = {
+    "SECRET": os.environ.get("JWT_SECRET_KEY") or SECRET_KEY,  # use a different value from DJANGO_SECRET_KEY in production
+    "ALGORITHM": "HS256",
+    "ISSUER": "mandifresh-api",
+    "AUDIENCE": "mandifresh-web",
+    "ACCESS_TTL": timedelta(minutes=15),
+    "REFRESH_TTL": timedelta(days=7),
 }
+if not DEBUG and len(JWT["SECRET"]) < 32:
+    raise ImproperlyConfigured("JWT_SECRET_KEY must be at least 32 characters.")
 
 # Refresh token lives in an httpOnly cookie (not readable by JavaScript).
 REFRESH_COOKIE_NAME = "mf_refresh"
@@ -139,7 +141,6 @@ CORS_ALLOWED_ORIGINS = env_list("CORS_ALLOWED_ORIGINS", "http://localhost:5173")
 CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS", "http://localhost:5173")
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:5173").rstrip("/")
-ADMIN_URL = os.environ.get("ADMIN_URL", "admin/").strip("/") + "/"
 
 # --- Email ---
 EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")

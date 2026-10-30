@@ -12,6 +12,8 @@ services:
         value: 3.12.7
       - key: DJANGO_SECRET_KEY
         generateValue: true
+      - key: JWT_SECRET_KEY
+        generateValue: true
       - key: DJANGO_DEBUG
         value: "False"
       - key: DATABASE_URL

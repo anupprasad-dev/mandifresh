@@ -20,3 +20,10 @@ export function RequireSeller({ children }) {
   if (!user || user.role !== "seller") return <Navigate to="/seller/login" replace />;
   return children;
 }
+
+export function RequireAdmin({ children }) {
+  const { user, loading } = useAuth();
+  if (loading) return <Spinner />;
+  if (!user || user.role !== "admin") return <Navigate to="/admin/login" replace />;
+  return children;
+}

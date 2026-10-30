@@ -34,44 +34,47 @@ export default function Header() {
   };
 
   return (
-    <header className="header">
-      <div className="container header-row">
-        <Logo />
-        <form className="search" onSubmit={submit} role="search">
-          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search for vegetables, dal, milk…" aria-label="Search products" />
-          <button type="submit" aria-label="Search">🔍</button>
-        </form>
-        <nav className="nav">
-          <NavLink to="/shop" className="nav-link hide-sm">Shop</NavLink>
-          <Link to="/cart" className="cart-link" aria-label={`Cart, ${count} items`}>
-            🛒<span className="hide-sm"> Cart</span>
-            {count > 0 && <span className="cart-count">{count}</span>}
-          </Link>
-          {user ? (
-            <div className="user-menu" ref={menuRef}>
-              <button className="btn btn-ghost" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
-                <span className="avatar">{user.name?.[0]?.toUpperCase()}</span>
-                <span className="hide-sm">{user.name.split(" ")[0]}</span> ▾
-              </button>
-              {open && (
-                <div className="menu" onClick={() => setOpen(false)}>
-                  {user.role === "seller" ? (
-                    <Link to="/seller">Seller dashboard</Link>
-                  ) : (
-                    <>
-                      <Link to="/orders">My orders</Link>
-                      <Link to="/account">My account</Link>
-                    </>
-                  )}
-                  <button onClick={async () => { await logout(); navigate("/"); }}>Sign out</button>
-                </div>
-              )}
-            </div>
-          ) : (
-            <Link to="/login" className="btn btn-primary">Login</Link>
-          )}
-        </nav>
+    <>
+      <div className="topbar">
+        <div className="container topbar-row">
+          <span>🚚 Free delivery on orders above ₹499</span>
+          <span className="hide-sm">💵 Cash on delivery · Easy cancellation</span>
+        </div>
       </div>
-    </header>
+      <header className="header">
+        <div className="container header-row">
+          <Logo />
+          <form className="search" onSubmit={submit} role="search">
+            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search vegetables, dal, milk, spices…" aria-label="Search products" />
+            <button type="submit" aria-label="Search">Search</button>
+          </form>
+          <nav className="nav">
+            <NavLink to="/shop" className="nav-link hide-sm">Shop</NavLink>
+            <Link to="/cart" className="cart-link" aria-label={`Cart, ${count} items`}>
+              <span className="cart-ico">🛒</span><span className="hide-sm">Cart</span>
+              {count > 0 && <span className="cart-count">{count}</span>}
+            </Link>
+            {user ? (
+              <div className="user-menu" ref={menuRef}>
+                <button className="btn btn-ghost" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
+                  <span className="avatar">{user.name?.[0]?.toUpperCase()}</span>
+                  <span className="hide-sm">{user.name.split(" ")[0]}</span> ▾
+                </button>
+                {open && (
+                  <div className="menu" onClick={() => setOpen(false)}>
+                    {user.role === "seller" && <Link to="/seller">Seller dashboard</Link>}
+                    {user.role === "admin" && <Link to="/admin">Admin panel</Link>}
+                    {user.role === "customer" && (<><Link to="/orders">My orders</Link><Link to="/account">My account</Link></>)}
+                    <button onClick={async () => { await logout(); navigate("/"); }}>Sign out</button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link to="/login" className="btn btn-primary">Login</Link>
+            )}
+          </nav>
+        </div>
+      </header>
+    </>
   );
 }

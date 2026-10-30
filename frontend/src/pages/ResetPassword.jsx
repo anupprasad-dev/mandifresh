@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import api, { errorMessage } from "../api";
+import AuthLayout from "../components/AuthLayout";
 import { Field, PasswordInput, StrengthBar } from "../components/Field";
-import { Logo } from "../components/Header";
 
 export default function ResetPassword({ seller = false }) {
   const [params] = useSearchParams();
@@ -24,22 +24,18 @@ export default function ResetPassword({ seller = false }) {
   };
 
   return (
-    <div className="auth-wrap">
-      <form className="card auth-card" onSubmit={submit}>
-        <Logo />
-        <h1>Choose a new password</h1>
-        {done ? (
-          <div className="success-box">Your password has been reset. <Link className="link" to={seller ? "/seller/login" : "/login"}>Sign in</Link></div>
-        ) : (
-          <>
-            {error && <div className="alert" role="alert">{error}</div>}
-            <Field id="pw" label="New password"><PasswordInput id="pw" value={pw} onChange={(e) => setPw(e.target.value)} autoComplete="new-password" /></Field>
-            <StrengthBar value={pw} />
-            <Field id="cf" label="Confirm new password"><PasswordInput id="cf" value={confirm} onChange={(e) => setConfirm(e.target.value)} autoComplete="new-password" /></Field>
-            <button className="btn btn-primary btn-lg block" disabled={busy}>{busy ? "Saving…" : "Reset password"}</button>
-          </>
-        )}
-      </form>
-    </div>
+    <AuthLayout variant={seller ? "seller" : "customer"} title="Choose a new password">
+      {done ? (
+        <div className="success-box">Your password has been reset. <Link className="link" to={seller ? "/seller/login" : "/login"}>Sign in</Link></div>
+      ) : (
+        <form onSubmit={submit}>
+          {error && <div className="alert" role="alert">{error}</div>}
+          <Field id="pw" label="New password"><PasswordInput id="pw" value={pw} onChange={(e) => setPw(e.target.value)} autoComplete="new-password" /></Field>
+          <StrengthBar value={pw} />
+          <Field id="cf" label="Confirm new password"><PasswordInput id="cf" value={confirm} onChange={(e) => setConfirm(e.target.value)} autoComplete="new-password" /></Field>
+          <button className="btn btn-primary btn-lg block" disabled={busy}>{busy ? "Saving…" : "Reset password"}</button>
+        </form>
+      )}
+    </AuthLayout>
   );
 }

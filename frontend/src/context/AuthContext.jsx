@@ -25,6 +25,7 @@ export function AuthProvider({ children }) {
   const register = useCallback(async (payload) => finish((await api.post("/auth/register/", payload)).data), []);
   const sellerLogin = useCallback(async (email, password) => finish((await api.post("/seller/auth/login/", { email, password })).data), []);
   const sellerRegister = useCallback(async (payload) => finish((await api.post("/seller/auth/register/", payload)).data), []);
+  const adminLogin = useCallback(async (email, password) => finish((await api.post("/admin/auth/login/", { email, password })).data), []);
   const logout = useCallback(async () => {
     try { await api.post("/auth/logout/"); } catch { /* cookie is cleared best-effort */ }
     setAccessToken(null);
@@ -32,8 +33,8 @@ export function AuthProvider({ children }) {
   }, []);
 
   const value = useMemo(
-    () => ({ user, setUser, loading, login, register, sellerLogin, sellerRegister, logout }),
-    [user, loading, login, register, sellerLogin, sellerRegister, logout]
+    () => ({ user, setUser, loading, login, register, sellerLogin, sellerRegister, adminLogin, logout, applySession: finish }),
+    [user, loading, login, register, sellerLogin, sellerRegister, adminLogin, logout]
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

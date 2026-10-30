@@ -9,11 +9,6 @@ export default function ProductCard({ product }) {
   const toast = useToast();
   const inCart = lines.find((l) => l.id === product.id);
 
-  const addToCart = () => {
-    add(product, 1);
-    toast(`${product.name} added to cart`);
-  };
-
   return (
     <article className="card product-card">
       <Link to={`/product/${product.slug}`} className="pc-media" aria-label={product.name}>
@@ -24,21 +19,25 @@ export default function ProductCard({ product }) {
         <span className="pc-cat">{product.category?.name}</span>
         <Link to={`/product/${product.slug}`} className="pc-name">{product.name}</Link>
         <span className="pc-unit">{product.unit}</span>
-        <div className="pc-price">
-          <strong>{inr(product.price)}</strong>
-          {product.mrp && Number(product.mrp) > Number(product.price) && <s>{inr(product.mrp)}</s>}
-        </div>
-        {!product.in_stock ? (
-          <button className="btn btn-disabled" disabled>Out of stock</button>
-        ) : inCart ? (
-          <div className="stepper" aria-label="Quantity">
-            <button onClick={() => setQty(product.id, inCart.qty - 1)} aria-label="Decrease">−</button>
-            <span>{inCart.qty}</span>
-            <button onClick={() => setQty(product.id, inCart.qty + 1)} aria-label="Increase" disabled={inCart.qty >= product.stock}>+</button>
+        <div className="pc-foot">
+          <div className="pc-price">
+            <strong>{inr(product.price)}</strong>
+            {product.mrp && Number(product.mrp) > Number(product.price) && <s>{inr(product.mrp)}</s>}
           </div>
-        ) : (
-          <button className="btn btn-outline" onClick={addToCart}>Add to cart</button>
-        )}
+          {!product.in_stock ? (
+            <span className="oos">Out of stock</span>
+          ) : inCart ? (
+            <div className="stepper sm" aria-label="Quantity">
+              <button onClick={() => setQty(product.id, inCart.qty - 1)} aria-label="Decrease">−</button>
+              <span>{inCart.qty}</span>
+              <button onClick={() => setQty(product.id, inCart.qty + 1)} aria-label="Increase" disabled={inCart.qty >= product.stock}>+</button>
+            </div>
+          ) : (
+            <button className="add-btn" onClick={() => { add(product, 1); toast(`${product.name} added to cart`); }} aria-label={`Add ${product.name} to cart`}>
+              Add <span>+</span>
+            </button>
+          )}
+        </div>
       </div>
     </article>
   );

@@ -5,7 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 
 export default function Account() {
-  const { user, setUser } = useAuth();
+  const { user, setUser, applySession } = useAuth();
   const toast = useToast();
   const [profile, setProfile] = useState({ name: user.name, phone: user.phone || "" });
   const [pw, setPw] = useState({ old_password: "", new_password: "" });
@@ -19,7 +19,12 @@ export default function Account() {
 
   const changePw = async (e) => {
     e.preventDefault(); setPwErr({});
-    try { await api.post("/auth/change-password/", pw); setPw({ old_password: "", new_password: "" }); toast("Password changed"); }
+    try {
+      const { data } = await api.post("/auth/change-password/", pw);
+      applySession(data); // fresh tokens for this device; other devices are signed out
+      setPw({ old_password: "", new_password: "" });
+      toast("Password changed. Other devices were signed out.");
+    }
     catch (err) { setPwErr(fieldErrors(err)); }
   };
 

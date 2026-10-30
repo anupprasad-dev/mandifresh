@@ -10,11 +10,12 @@ PHONE_RE = r"^[0-9+\-\s]{7,15}$"
 
 class UserSerializer(serializers.ModelSerializer):
     store_name = serializers.CharField(source="seller_profile.store_name", read_only=True, default=None)
+    seller_approved = serializers.BooleanField(source="seller_profile.is_approved", read_only=True, default=None)
 
     class Meta:
         model = User
-        fields = ("id", "name", "email", "phone", "role", "store_name")
-        read_only_fields = ("id", "email", "role", "store_name")
+        fields = ("id", "name", "email", "phone", "role", "store_name", "seller_approved")
+        read_only_fields = ("id", "email", "role", "store_name", "seller_approved")
 
 
 class ProfileUpdateSerializer(serializers.ModelSerializer):
@@ -90,6 +91,10 @@ class CustomerLoginSerializer(LoginSerializer):
 
 class SellerLoginSerializer(LoginSerializer):
     required_role = User.Role.SELLER
+
+
+class AdminLoginSerializer(LoginSerializer):
+    required_role = User.Role.ADMIN
 
 
 class ChangePasswordSerializer(serializers.Serializer):

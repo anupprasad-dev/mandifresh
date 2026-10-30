@@ -15,12 +15,13 @@ class ProductSerializer(serializers.ModelSerializer):
     store_name = serializers.CharField(source="seller.seller_profile.store_name", read_only=True, default="")
     discount_percent = serializers.IntegerField(read_only=True)
     in_stock = serializers.SerializerMethodField()
+    image = serializers.CharField(source="image_src", read_only=True)
 
     class Meta:
         model = Product
         fields = (
             "id", "name", "slug", "description", "price", "mrp", "discount_percent", "unit",
-            "stock", "in_stock", "image_url", "category", "store_name", "is_featured",
+            "stock", "in_stock", "image", "category", "store_name", "is_featured",
         )
 
     def get_in_stock(self, obj):
@@ -31,12 +32,14 @@ class SellerProductSerializer(serializers.ModelSerializer):
     """Seller-side CRUD; the seller is always the authenticated user."""
     category_detail = CategorySerializer(source="category", read_only=True)
     discount_percent = serializers.IntegerField(read_only=True)
+    image = serializers.CharField(source="image_src", read_only=True)
+    has_upload = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = Product
         fields = (
             "id", "name", "slug", "description", "price", "mrp", "discount_percent", "unit", "stock",
-            "image_url", "category", "category_detail", "is_active", "created_at",
+            "image", "image_url", "has_upload", "category", "category_detail", "is_active", "created_at",
         )
         read_only_fields = ("id", "slug", "created_at")
 

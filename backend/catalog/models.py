@@ -33,7 +33,10 @@ class Product(models.Model):
     mrp = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     unit = models.CharField(max_length=40, default="1 kg", help_text="e.g. 500 g, 1 L, 1 dozen")
     stock = models.PositiveIntegerField(default=0)
-    image_url = models.URLField(max_length=500, blank=True)
+    image_url = models.URLField(max_length=500, blank=True, help_text="Optional external image link")
+    # Uploaded photo is stored in the database (works on hosts with ephemeral disks, e.g. Render).
+    image_data = models.BinaryField(null=True, blank=True, editable=False)
+    image_type = models.CharField(max_length=20, blank=True, editable=False)
     is_active = models.BooleanField(default=True)
     is_featured = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -52,6 +55,17 @@ class Product(models.Model):
                 slug = f"{base}-{n}"
             self.slug = slug
         super().save(*args, **kwargs)
+
+    @property
+    def has_upload(self):
+        return bool(self.image_type)
+
+    @property
+    def image_src(self):
+        """URL the browser should use for this product's picture ('' if none)."""
+        if self.image_type:
+            return f"/api/products/{self.pk}/image/?v={int(self.updated_at.timestamp())}"
+        return self.image_url
 
     @property
     def discount_percent(self):
